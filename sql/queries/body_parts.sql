@@ -1,0 +1,12 @@
+-- name: SubmitBodyPart :one
+INSERT INTO tracker.body_parts (
+  NAME, REGION, UPPER_OR_LOWER
+) VALUES (
+  $1, $2, $3
+)
+ON CONFLICT (NAME) 
+DO UPDATE SET 
+  REGION = $2,
+  UPPER_OR_LOWER = $3,
+  UPDT_TS = CURRENT_TIMESTAMP
+RETURNING *;
