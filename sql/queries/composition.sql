@@ -4,6 +4,11 @@ INSERT INTO tracker.composition (
 ) VALUES (
   $1, $2, $3
 )
+ON CONFLICT (SUBMITTED_ON) 
+DO UPDATE SET 
+  WEIGHT = $2,
+  BODYFAT = $3,
+  UPDT_TS = CURRENT_TIMESTAMP
 RETURNING *;
 
 -- name: GetComposition :one
