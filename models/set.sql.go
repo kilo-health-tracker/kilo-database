@@ -15,9 +15,8 @@ INSERT INTO tracker.set_performed (
 ) VALUES (
   $1, $2, $3
 )
-ON CONFLICT (WORKOUT_ID, GROUP_ID, SET_NUMBER) 
+ON CONFLICT (WORKOUT_ID, GROUP_ID) 
 DO UPDATE SET 
-  SET_NUMBER = $3,
   UPDT_TS = CURRENT_TIMESTAMP
 RETURNING id, set_number, workout_id, group_id, cret_ts, updt_ts
 `
