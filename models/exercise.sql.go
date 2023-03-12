@@ -155,7 +155,7 @@ INSERT INTO tracker.exercise_performed (
 ) VALUES (
   $1, $2, $3, $4, $5
 )
-ON CONFLICT (WORKOUT_ID, GROUP_ID) 
+ON CONFLICT (SET_ID, EXERCISE_NAME) 
 DO UPDATE SET 
   UPDT_TS = CURRENT_TIMESTAMP
 RETURNING id, set_id, exercise_name, reps, weight, reps_in_reserve, cret_ts, updt_ts
