@@ -6,9 +6,15 @@ INSERT INTO tracker.workout_performed (
 )
 RETURNING *;
 
--- name: GetWorkoutPerformed :one
-SELECT * FROM tracker.workout_performed
-WHERE SUBMITTED_ON = $1 LIMIT 1;
+-- name: GetWorkoutPerformed :many
+select a.submitted_on, a.workout_name, b.group_id, b.set_number, c.exercise_name, c.reps, c.weight, c.reps_in_reserve 
+from workout a
+join tracker.set_performed b
+	on a.id = b.workout_id
+join tracker.exercise_performed c
+	on b.id = c.set_id
+where workout.submitted_on = $1
+;
 
 -- name: DeleteWorkoutPerformed :exec
 DELETE FROM tracker.workout_performed

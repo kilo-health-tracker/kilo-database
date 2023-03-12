@@ -76,22 +76,62 @@ func (q *Queries) GetWorkoutNames(ctx context.Context, limit int32) ([]string, e
 	return items, nil
 }
 
-const getWorkoutPerformed = `-- name: GetWorkoutPerformed :one
-SELECT id, submitted_on, workout_name, cret_ts, updt_ts FROM tracker.workout_performed
-WHERE SUBMITTED_ON = $1 LIMIT 1
+const getWorkoutPerformed = `-- name: GetWorkoutPerformed :many
+with workout as (
+	select id, submitted_on, workout_name, rank() over(partition by submitted_on order by id desc) as rnk
+	from tracker.workout_performed
+)
+select a.submitted_on, a.workout_name, b.group_id, b.set_number, c.exercise_name, c.reps, c.weight, c.reps_in_reserve 
+from workout a
+join tracker.set_performed b
+	on a.id = b.workout_id
+join tracker.exercise_performed c
+	on b.id = c.set_id
+WHERE a.submitted_on = '2023-02-01'
+and a.rnk = 1
 `
 
-func (q *Queries) GetWorkoutPerformed(ctx context.Context, submittedOn time.Time) (TrackerWorkoutPerformed, error) {
-	row := q.db.QueryRowContext(ctx, getWorkoutPerformed, submittedOn)
-	var i TrackerWorkoutPerformed
-	err := row.Scan(
-		&i.ID,
-		&i.SubmittedOn,
-		&i.WorkoutName,
-		&i.CretTs,
-		&i.UpdtTs,
-	)
-	return i, err
+type GetWorkoutPerformedRow struct {
+	SubmittedOn   time.Time      `json:"submittedOn"`
+	WorkoutName   string         `json:"workoutName"`
+	GroupID       int16          `json:"groupID"`
+	SetNumber     int16          `json:"setNumber"`
+	ExerciseName  string         `json:"exerciseName"`
+	Reps          int16          `json:"reps"`
+	Weight        int16          `json:"weight"`
+	RepsInReserve sql.NullString `json:"repsInReserve"`
+}
+
+func (q *Queries) GetWorkoutPerformed(ctx context.Context) ([]GetWorkoutPerformedRow, error) {
+	rows, err := q.db.QueryContext(ctx, getWorkoutPerformed)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetWorkoutPerformedRow
+	for rows.Next() {
+		var i GetWorkoutPerformedRow
+		if err := rows.Scan(
+			&i.SubmittedOn,
+			&i.WorkoutName,
+			&i.GroupID,
+			&i.SetNumber,
+			&i.ExerciseName,
+			&i.Reps,
+			&i.Weight,
+			&i.RepsInReserve,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const submitWorkout = `-- name: SubmitWorkout :one
