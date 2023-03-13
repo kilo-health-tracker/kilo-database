@@ -87,7 +87,7 @@ join tracker.set_performed b
 	on a.id = b.workout_id
 join tracker.exercise_performed c
 	on b.id = c.set_id
-WHERE a.submitted_on = '2023-02-01'
+WHERE a.submitted_on = $1
 and a.rnk = 1
 `
 
