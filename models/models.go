@@ -5,7 +5,6 @@
 package models
 
 import (
-	"database/sql"
 	"time"
 
 	"github.com/tabbed/pqtype"
