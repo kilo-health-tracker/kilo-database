@@ -77,18 +77,13 @@ func (q *Queries) GetWorkoutNames(ctx context.Context, limit int32) ([]string, e
 }
 
 const getWorkoutPerformed = `-- name: GetWorkoutPerformed :many
-with workout as (
-	select id, submitted_on, workout_name, rank() over(partition by submitted_on order by id desc) as rnk
-	from tracker.workout_performed
-)
 select a.submitted_on, a.workout_name, b.group_id, b.set_number, c.exercise_name, c.reps, c.weight, c.reps_in_reserve 
-from workout a
+from tracker.workout_performed a
 join tracker.set_performed b
 	on a.id = b.workout_id
 join tracker.exercise_performed c
 	on b.id = c.set_id
-WHERE a.submitted_on = $1
-and a.rnk = 1
+where a.submitted_on = $1
 `
 
 type GetWorkoutPerformedRow struct {
@@ -102,8 +97,8 @@ type GetWorkoutPerformedRow struct {
 	RepsInReserve sql.NullString `json:"repsInReserve"`
 }
 
-func (q *Queries) GetWorkoutPerformed(ctx context.Context) ([]GetWorkoutPerformedRow, error) {
-	rows, err := q.db.QueryContext(ctx, getWorkoutPerformed)
+func (q *Queries) GetWorkoutPerformed(ctx context.Context, submittedOn time.Time) ([]GetWorkoutPerformedRow, error) {
+	rows, err := q.db.QueryContext(ctx, getWorkoutPerformed, submittedOn)
 	if err != nil {
 		return nil, err
 	}

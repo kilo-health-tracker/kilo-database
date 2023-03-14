@@ -7,18 +7,13 @@ INSERT INTO tracker.workout_performed (
 RETURNING *;
 
 -- name: GetWorkoutPerformed :many
-with workout as (
-	select id, submitted_on, workout_name, rank() over(partition by submitted_on order by id desc) as rnk
-	from tracker.workout_performed
-)
 select a.submitted_on, a.workout_name, b.group_id, b.set_number, c.exercise_name, c.reps, c.weight, c.reps_in_reserve 
-from workout a
+from tracker.workout_performed a
 join tracker.set_performed b
 	on a.id = b.workout_id
 join tracker.exercise_performed c
 	on b.id = c.set_id
-WHERE a.submitted_on = $1
-and a.rnk = 1
+where a.submitted_on = $1
 ;
 
 -- name: DeleteWorkoutPerformed :exec
