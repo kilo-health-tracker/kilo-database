@@ -16,3 +16,6 @@
 
 # Local
 .env
+
+# Docker
+docker-compose.yml
