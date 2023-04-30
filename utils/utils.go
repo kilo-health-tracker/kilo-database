@@ -3,23 +3,24 @@ package utils
 import (
 	"database/sql"
 	"fmt"
+	"os"
 
 	_ "github.com/lib/pq"
 
 	"github.com/kilo-health-tracker/kilo-database/models"
 )
 
-const (
-	host     = "localhost"
-	port     = 5432
-	user     = "docker"
-	password = "docker"
-	dbname   = "docker"
-	sslmode  = "disable"
+var (
+	host string 	= os.Getenv("POSTGRES_HOST")
+	port string 	= os.Getenv("POSTGRES_PORT")
+	user string 	= os.Getenv("POSTGRES_USERNAME")
+	password string = os.Getenv("POSTGRES_PASSWORD")
+	dbname string  	= os.Getenv("KILO_DATABASE")
+	sslmode string 	= "disable"
 )
 
 func getConnectionString() string {
-	connectionString := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=%s",
+	connectionString := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
 		host, port, user, password, dbname, sslmode)
 
 	return connectionString
