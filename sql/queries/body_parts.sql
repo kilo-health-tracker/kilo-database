@@ -10,3 +10,11 @@ DO UPDATE SET
   UPPER_OR_LOWER = $3,
   UPDT_TS = CURRENT_TIMESTAMP
 RETURNING *;
+
+-- name: GetBodyPart :one
+SELECT * FROM tracker.body_parts
+WHERE NAME = $1 LIMIT 1;
+
+-- name: DeleteBodyPart :exec
+DELETE FROM tracker.body_parts
+WHERE NAME = $1;

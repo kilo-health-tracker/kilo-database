@@ -25,8 +25,11 @@ SELECT NAME FROM tracker.workout
 LIMIT $1;
 
 -- name: GetWorkout :one
-SELECT * FROM tracker.workout
-WHERE NAME = $1 LIMIT 1;
+SELECT b.name as workout_name, c.group_id, c.exercise_name, c.weight, c.sets, c.reps 
+FROM tracker.workout b
+JOIN tracker.workout_details c
+ON b.name = c.workout_name
+WHERE b.name = $1;
 
 -- name: DeleteWorkout :exec
 DELETE FROM tracker.workout
